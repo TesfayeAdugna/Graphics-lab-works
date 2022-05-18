@@ -66,6 +66,7 @@ def draw():
         P0 = [i,j]
         P = P0 + t*V
         glVertex2f(P[0],P[1])
+        
     # line 2
     V = np.array([1,1])
     t = 0
@@ -76,6 +77,7 @@ def draw():
         P0 = [i,j]
         P = P0 + t*V
         glVertex2f(P[0],P[1])
+
     # line 3
     V = np.array([1,1])
     t = 0
@@ -87,7 +89,7 @@ def draw():
         P = P0 + t*V
         glVertex2f(P[0],P[1])
 
-    # line 3
+    # line 4
     V = np.array([1,1])
     t = 0
     x0 = np.linspace(6,8,10000)
