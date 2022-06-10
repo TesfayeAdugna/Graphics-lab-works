@@ -19,3 +19,5 @@ lab5 includes drawing a 3D cube using vertexes and edges and rotating it using t
 lab6 is using a shader to draw a triangle
 ## lab7
 lab7 is giving colors for the lab6 triangle, and drawing triangle from a texture.
+## Learn From Videos
+https://www.youtube.com/watch?v=LqPPvPKUfV4&list=PL1P11yPQAo7opIg8r-4BMfh1Z_dCOfI0y&index=1
