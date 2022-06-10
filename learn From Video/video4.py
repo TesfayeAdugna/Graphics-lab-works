@@ -9,8 +9,8 @@ class Window:
         self.vertex_src = """
         # version 330
 
-        in vec3 a_position;
-        in vec3 a_color;
+        layout(location = 0) in vec3 a_position;
+        layout(location = 1) in vec3 a_color;
 
         out vec3 v_color;
 
@@ -50,9 +50,11 @@ class Window:
         vertices = [-0.5, -0.5, 0.0,
                     0.5, -0.5, 0.0,
                    -0.5,  0.5, 0.0,
+                    0.5,  0.5, 0.0,
                     1.0,  0.0, 0.0,
                     0.0,  1.0, 0.0,
-                    0.0,  0.0, 1.0 ]
+                    0.5,  0.0, 1.0,
+                    1.0,  1.0, 1.0 ]
 
         vertices = np.array(vertices, dtype=np.float32)
 
@@ -63,13 +65,12 @@ class Window:
         glBindBuffer(GL_ARRAY_BUFFER, VBO)
         glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
 
-        position = glGetAttribLocation(shader, "a_position")
-        glEnableVertexAttribArray(position)
-        glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(0))
 
-        color = glGetAttribLocation(shader, "a_color")
-        glEnableVertexAttribArray(color)
-        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(36))
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(36))
+
 
         glUseProgram(shader)
 
@@ -78,12 +79,13 @@ class Window:
     def Resize_Window(self, window, width, height):
         glViewport(0, 0, width, height)
 
+
     def main_loop(self):
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
             glClear(GL_COLOR_BUFFER_BIT)
 
-            glDrawArrays(GL_TRIANGLES, 0, 3)
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
 
             glfw.swap_buffers(self.window)
 
