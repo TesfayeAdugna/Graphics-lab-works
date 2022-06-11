@@ -21,3 +21,7 @@ lab6 is using a shader to draw a triangle
 lab7 is giving colors for the lab6 triangle, and drawing triangle from a texture.
 ## Learn From Videos
 https://www.youtube.com/watch?v=LqPPvPKUfV4&list=PL1P11yPQAo7opIg8r-4BMfh1Z_dCOfI0y&index=1
+
+### The best episode from the video is episode 15. I put the link below, it helps a lot for the final projects.
+
+https://www.youtube.com/watch?v=DKt4HRBqH1I&list=PL1P11yPQAo7opIg8r-4BMfh1Z_dCOfI0y&index=15
