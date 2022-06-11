@@ -2,6 +2,7 @@ import glfw
 from OpenGL.GL import *
 import numpy as np
 from OpenGL.GL.shaders import compileProgram, compileShader
+import pyrr
 
 class Window:
     def __init__(self, width:int, height:int, title:str):
@@ -12,11 +13,13 @@ class Window:
         layout(location = 0) in vec3 a_position;
         layout(location = 1) in vec3 a_color;
 
+        uniform mat4 rotation;
+
         out vec3 v_color;
 
         void main()
         {
-            gl_Position = vec4(a_position, 1.0);
+            gl_Position = rotation * vec4(a_position, 1.0);
             v_color = a_color;
         }
         """
@@ -47,17 +50,22 @@ class Window:
 
         glfw.make_context_current(self.window)
 
-        vertices = [-0.5, -0.5, 0.0,
-                    0.5, -0.5, 0.0,
-                   -0.5,  0.5, 0.0,
-                    0.5,  0.5, 0.0,
-                    1.0,  0.0, 0.0,
-                    0.0,  1.0, 0.0,
-                    0.5,  0.0, 1.0,
-                    1.0,  1.0, 1.0 ]
+        vertices = [-0.5, -0.5, 0.0,     1.0,  0.0, 0.0,
+                    0.5, -0.5, 0.0,      0.0,  1.0, 0.0,
+                    0.5,  0.5, 0.0,      0.5,  0.0, 1.0,
+                   -0.5,  0.5, 0.0,      1.0,  1.0, 1.0,
 
-        self.indices = [0, 1, 2,
-                        1, 2, 3]
+                    -0.5, -0.5, -0.5,     1.0,  0.0, 0.0,
+                     0.5, -0.5, -0.5,      0.0,  1.0, 0.0,
+                     0.5,  0.5, -0.5,      0.5,  0.0, 1.0,
+                    -0.5,  0.5, -0.5,      1.0,  1.0, 1.0,]
+
+        self.indices = [0, 1, 2, 2, 3, 0,
+                        4, 5, 6, 6, 7, 4,
+                        4, 5, 1, 1, 0, 4,
+                        6, 7, 3, 3, 2, 6,
+                        5, 6, 2, 2, 1, 5,
+                        7, 4, 0, 0, 3, 7]
 
         vertices = np.array(vertices, dtype=np.float32)
         self.indices = np.array(self.indices, dtype=np.uint32)
@@ -74,15 +82,19 @@ class Window:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
 
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(0))
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
 
         glEnableVertexAttribArray(1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(48))
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
 
 
         glUseProgram(shader)
 
         glClearColor(0, 0.1, 0.1, 1)
+
+        glEnable(GL_DEPTH_TEST)
+
+        self.rotation_loc = glGetUniformLocation(shader, "rotation")
 
     def Resize_Window(self, window, width, height):
         glViewport(0, 0, width, height)
@@ -91,7 +103,14 @@ class Window:
     def main_loop(self):
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
-            glClear(GL_COLOR_BUFFER_BIT)
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            
+
+            rot_x = pyrr.Matrix44.from_x_rotation(0.5 * glfw.get_time())
+            rot_y = pyrr.Matrix44.from_y_rotation(0.8 * glfw.get_time())
+
+            # glUniformMatrix4fv(self.rotation_loc, 1, GL_FALSE, rot_x * rot_y)
+            glUniformMatrix4fv(self.rotation_loc, 1, GL_FALSE, pyrr.matrix44.multiply(rot_x, rot_y) )
 
             # glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
             glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
