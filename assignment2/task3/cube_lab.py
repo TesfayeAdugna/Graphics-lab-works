@@ -4,7 +4,8 @@ from pygame.locals import *
 from OpenGL.GL.shaders import *
 import numpy as np
 import os
-# import transform
+import pyrr
+import transform
 from PIL import Image
 
 vao, program, texture = None, None, None
@@ -35,13 +36,55 @@ def init():
 
     vertexes = np.array([
         # position          # color           # texture s, r
-        [0.5, 0.5, -.50,    1.0, 0.20, 0.8,   1.0, 1.0],
-        [0.5, -0.5, -.50,   1.0, 1.0, 0.0,    1.0, 0.0],
-        [-0.5, 0.5, -.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        [0.5, 0.5,   0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [0.5, -0.5,  0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, 0.5,  0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
 
-        [0.5, -0.5, -.50,   1.0, 1.0, 0.0,    1.0, 0.0],
-        [-0.5, -0.5, -.50,  0.0, 0.4, 1.0,    0.0, 0.0],
-        [-0.5, 0.5, -.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        [0.5, -0.5,  0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, -0.5, 0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [-0.5, 0.5,  0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        # the five new vertices
+        # 1 back
+        [0.5, 0.5, -0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [0.5, -0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        [0.5, -0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, -0.5, -0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [-0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        # 2 left
+        [0.5, 0.5, 0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [0.5, -0.5, 0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        [0.5, -0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [0.5, -0.5, 0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        # 3 top
+        [0.5, 0.5, 0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [-0.5, 0.5, 0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        [-0.5, 0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [0.5, 0.5, -0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [-0.5, 0.5, 0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        # 4 right
+        [-0.5, 0.5, 0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [-0.5, -0.5, 0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, 0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        [-0.5, 0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, -0.5, -0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [-0.5, -0.5, 0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+        # 5 bottom
+        [-0.5, -0.5, 0.50,    1.0, 0.20, 0.8,   1.0, 1.0],
+        [0.5, -0.5, 0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [-0.5, -0.5, -0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
+
+        [-0.5, -0.5, -0.50,   1.0, 1.0, 0.0,    1.0, 0.0],
+        [0.5, -0.5, -0.50,  0.0, 0.4, 1.0,    0.0, 0.0],
+        [0.5, -0.5, 0.50,   0.0, 0.7, 0.2,    0.0, 1.0],
 
     ], dtype=np.float32)
 
@@ -68,19 +111,13 @@ def init():
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data)
     glGenerateMipmap(GL_TEXTURE_2D)
 
-    positionLocation = glGetAttribLocation(program, "position");
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          6 * vertexes.itemsize, ctypes.c_void_p(0))
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * vertexes.itemsize, ctypes.c_void_p(0))
     glEnableVertexAttribArray(0)
 
-    colorLocation = glGetAttribLocation(program, "color");
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                          6 * vertexes.itemsize, ctypes.c_void_p(12))
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * vertexes.itemsize, ctypes.c_void_p(12))
     glEnableVertexAttribArray(1)
 
-    texLocation = glGetAttribLocation(program, "texCoord");
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                          8 * vertexes.itemsize, ctypes.c_void_p(24))
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * vertexes.itemsize, ctypes.c_void_p(24))
     glEnableVertexAttribArray(2)
 
 
@@ -92,15 +129,27 @@ def init():
     # glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
 
-def draw():
+def draw(x):
     global vao, program, texture
-    glClear(GL_COLOR_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT)
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LESS)
 
     glUseProgram(program)
     glBindVertexArray(vao)
     glBindTexture(GL_TEXTURE_2D, texture)
 
-    glDrawArrays(GL_TRIANGLES, 0, 6)
+    rotateMatLocation = glGetUniformLocation(program, "transform")
+
+    rotateMat_x = transform.rotationMatrix_x(x%360)
+    rotateMat_y = transform.rotationMatrix_y(x%360)
+    rotateMat_z = transform.rotationMatrix_z(x%360)
+
+    xy = pyrr.matrix44.multiply(rotateMat_x, rotateMat_y)
+
+    glUniformMatrix4fv(rotateMatLocation, 1, GL_FALSE, pyrr.matrix44.multiply(xy, rotateMat_z))
+
+    glDrawArrays(GL_TRIANGLES, 0, 36)
     
     glBindTexture(GL_TEXTURE_2D,0)
     glBindVertexArray(0)
@@ -108,12 +157,14 @@ def draw():
 
 def main():
     init()
+    x = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-        draw()
+        draw(x)
+        x += 1
         pygame.display.flip()
         pygame.time.wait(10)
 

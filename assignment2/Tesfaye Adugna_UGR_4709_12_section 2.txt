@@ -1,0 +1,9 @@
+"""
+Name: Tesfaye Adugna
+Id: UGR/4709/12
+Section: 2
+
+I've pushed all of my works on github. I put the link below.
+
+https://github.com/TesfayeAdugna/Graphics-lab-works 
+"""
